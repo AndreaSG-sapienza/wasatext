@@ -1,0 +1,718 @@
+openapi: 3.0.3
+info:
+  title: WASAText API Specification
+  description: API for the WASAText messaging application
+  version: "1.0.0"
+paths:
+  /session:
+    post:
+      tags: ["login"]
+      summary: Logs in the user
+      description: |-
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Maria
+                  pattern: '^.*?$'
+                  minLength: 3
+                  maxLength: 16
+              required:
+                - name
+      responses:
+        '201':
+          description: User log-in action successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identifier:
+                    type: string
+                    example: "abcdef012345"
+
+  /setMyUserName:
+    post:
+      tags: ["user"]
+      operationId: setMyUserName
+      summary: Sets the user's name
+      description: |-
+        Sets the user's name when requested by user, 
+        this command can be used both when the user 
+        is creating his account for the first time,
+        and when the account has already been created.
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: The user's new name
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetUserName"
+      responses:
+        '201':
+          description: User name successfully set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetUserNameResponse"
+
+  /getMyConversations:
+    get:
+      tags: ["conversations"]
+      operationId: getMyConversations
+      summary: Gets the list of user's conversations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationsList"
+
+  /getConversation:
+    get:
+      tags: ["conversations"]
+      operationId: getConversation
+      summary: Gets a specific conversation with messages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversationId
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "conv123"
+      responses:
+        '200':
+          description: Conversation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        '404':
+          description: Conversation not found
+
+  /sendMessage:
+    post:
+      tags: ["messages"]
+      operationId: sendMessage
+      summary: Sends a new message
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Message details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageRequest"
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '400':
+          description: Invalid message format
+
+  /forwardMessage:
+    post:
+      tags: ["messages"]
+      operationId: forwardMessage
+      summary: Forwards a message to another user or group
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Forward message details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForwardMessageRequest"
+      responses:
+        '201':
+          description: Message forwarded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '404':
+          description: Original message not found
+
+  /commentMessage:
+    post:
+      tags: ["messages"]
+      operationId: commentMessage
+      summary: Adds a reaction/comment to a message
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Comment details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentRequest"
+      responses:
+        '201':
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        '404':
+          description: Message not found
+
+  /uncommentMessage:
+    delete:
+      tags: ["messages"]
+      operationId: uncommentMessage
+      summary: Removes a reaction/comment from a message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: messageId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Comment removed
+        '404':
+          description: Comment or message not found
+
+  /deleteMessage:
+    delete:
+      tags: ["messages"]
+      operationId: deleteMessage
+      summary: Deletes a message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: messageId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Message deleted
+        '404':
+          description: Message not found
+        '403':
+          description: Not authorized to delete this message
+
+  /addToGroup:
+    post:
+      tags: ["groups"]
+      operationId: addToGroup
+      summary: Adds a user to a group conversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Group membership details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToGroupRequest"
+      responses:
+        '201':
+          description: User added to group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupMember"
+        '404':
+          description: Group or user not found
+
+  /leaveGroup:
+    delete:
+      tags: ["groups"]
+      operationId: leaveGroup
+      summary: Leaves a group conversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Left group successfully
+        '404':
+          description: Group not found
+
+  /setGroupName:
+    put:
+      tags: ["groups"]
+      operationId: setGroupName
+      summary: Updates a group name
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: New group name
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupNameRequest"
+      responses:
+        '200':
+          description: Group name updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupName"
+        '404':
+          description: Group not found
+        '403':
+          description: Not authorized to change group name
+
+  /setMyPhoto:
+    put:
+      tags: ["user"]
+      operationId: setMyPhoto
+      summary: Updates the user's profile photo
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: New profile photo
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhotoRequest"
+      responses:
+        '200':
+          description: Photo updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        '400':
+          description: Invalid image format
+
+  /setGroupPhoto:
+    put:
+      tags: ["groups"]
+      operationId: setGroupPhoto
+      summary: Updates a group photo
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: New group photo
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupPhotoRequest"
+      responses:
+        '200':
+          description: Group photo updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        '404':
+          description: Group not found
+        '403':
+          description: Not authorized to change group photo
+
+components:
+  schemas:
+    SetUserName:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Joseph"
+          minLength: 1
+          maxLength: 16
+      required:
+        - name
+
+    SetUserNameResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Joseph"
+        userId:
+          type: string
+          example: "user123"
+
+    ConversationsList:
+      type: object
+      properties:
+        currentUser:
+          type: string
+          example: "Andrea"
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationPreview"
+        totalCount:
+          type: integer
+          example: 5
+      required:
+        - currentUser
+        - conversations
+        
+    ConversationPreview:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "conv123"
+        name:
+          type: string
+          example: "Giovanni"
+        photo:
+          type: string
+          format: uri
+          example: "https://example.com/photos/giovanni.jpg"
+        lastMessage:
+          type: object
+          properties:
+            text:
+              type: string
+              example: "See you tomorrow!"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2023-05-06T14:30:00Z"
+            isPhoto:
+              type: boolean
+              example: false
+        isGroup:
+          type: boolean
+          example: false
+      required:
+        - id
+        - name
+        - lastMessage
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "conv123"
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              photo:
+                type: string
+                format: uri
+          example: [{"id": "user123", "name": "Andrea", "photo": "https://example.com/photos/andrea.jpg"}, {"id": "user456", "name": "Giovanni", "photo": "https://example.com/photos/giovanni.jpg"}]
+        isGroup:
+          type: boolean
+          example: false
+        groupName:
+          type: string
+          example: "Friends"
+        groupPhoto:
+          type: string
+          format: uri
+          example: "https://example.com/photos/group.jpg"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+      required:
+        - id
+        - participants
+        - isGroup
+        - messages
+
+    MessageRequest:
+      type: object
+      properties:
+        receiverId:
+          type: string
+          example: "user456"
+        content:
+          type: string
+          example: "Hello world"
+        isGroupMessage:
+          type: boolean
+          example: false
+        imageData:
+          type: string
+          format: byte
+          description: "Base64 encoded image (if sending a photo)"
+      required:
+        - receiverId
+
+    ForwardMessageRequest:
+      type: object
+      properties:
+        messageId:
+          type: string
+          example: "msg123"
+        receiverId:
+          type: string
+          example: "user789"
+        isGroupMessage:
+          type: boolean
+          example: false
+      required:
+        - messageId
+        - receiverId
+        
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "msg123"
+        senderId:
+          type: string
+          example: "user123"
+        senderName:
+          type: string
+          example: "Andrea"
+        receiverId:
+          type: string
+          example: "user456"
+        receiverName:
+          type: string
+          example: "Giuseppe"
+        content:
+          type: string
+          example: "Hello world"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-05-06T14:30:00Z"
+        status:
+          type: string
+          enum: [sent, received, read]
+          example: "sent"
+        isPhoto:
+          type: boolean
+          example: false
+        imageUrl:
+          type: string
+          format: uri
+          example: "https://example.com/photos/message/cat.jpg"
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+      required:
+        - id
+        - senderId
+        - timestamp
+        - status
+
+    CommentRequest:
+      type: object
+      properties:
+        messageId:
+          type: string
+          example: "msg123"
+        content:
+          type: string
+          example: "👍"
+      required:
+        - messageId
+        - content
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "comment123"
+        messageId:
+          type: string
+          example: "msg123"
+        senderId:
+          type: string
+          example: "user123"
+        senderName:
+          type: string
+          example: "Andrea"
+        content:
+          type: string
+          example: "👍"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-05-06T14:35:00Z"
+      required:
+        - id
+        - messageId
+        - senderId
+        - content
+        - timestamp
+
+    AddToGroupRequest:
+      type: object
+      properties:
+        groupId:
+          type: string
+          example: "group123"
+        userId:
+          type: string
+          example: "user789"
+      required:
+        - groupId
+        - userId
+
+    GroupMember:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "member123"
+        userId:
+          type: string
+          example: "user123"
+        userName:
+          type: string
+          example: "Andrea"
+        groupId:
+          type: string
+          example: "group123"
+        groupName:
+          type: string
+          example: "PC enthusiasts"
+        role:
+          type: string
+          enum: [member, admin]
+          example: "admin"
+        joinedAt:
+          type: string
+          format: date-time
+          example: "2023-05-01T10:00:00Z"
+      required:
+        - id
+        - userId
+        - groupId
+        - role
+
+    GroupNameRequest:
+      type: object
+      properties:
+        groupId:
+          type: string
+          example: "group123"
+        name:
+          type: string
+          example: "PC enthusiasts"
+          minLength: 1
+          maxLength: 50
+      required:
+        - groupId
+        - name
+
+    GroupName:
+      type: object
+      properties:
+        groupId:
+          type: string
+          example: "group123"
+        name:
+          type: string
+          example: "PC enthusiasts"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-06T14:30:00Z"
+      required:
+        - groupId
+        - name
+        - updatedAt
+
+    PhotoRequest:
+      type: object
+      properties:
+        imageData:
+          type: string
+          format: byte
+          description: "Base64 encoded image data"
+        mimeType:
+          type: string
+          example: "image/jpeg"
+      required:
+        - imageData
+        - mimeType
+
+    GroupPhotoRequest:
+      type: object
+      properties:
+        groupId:
+          type: string
+          example: "group123"
+        imageData:
+          type: string
+          format: byte
+          description: "Base64 encoded image data"
+        mimeType:
+          type: string
+          example: "image/jpeg"
+      required:
+        - groupId
+        - imageData
+        - mimeType
+
+    Photo:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "photo123"
+        ownerId:
+          type: string
+          example: "user123"
+        ownerType:
+          type: string
+          enum: [user, group]
+          example: "user"
+        imageUrl:
+          type: string
+          format: uri
+          example: "https://example.com/photos/user123.jpg"
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://example.com/photos/thumb/user123.jpg"
+        uploadedAt:
+          type: string
+          format: date-time
+          example: "2023-05-06T14:30:00Z"
+      required:
+        - id
+        - ownerId
+        - ownerType
+        - imageUrl
+        - uploadedAt
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

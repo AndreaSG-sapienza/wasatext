@@ -1,0 +1,21 @@
+/* Chat view page styles */
+
+.chat-container {
+    /* Main chat container */
+}
+
+.message {
+    /* Base message styling */
+}
+
+.message-sent {
+    /* Sent message styling */
+}
+
+.message-received {
+    /* Received message styling */
+}
+
+.message-input {
+    /* Message input area */
+}

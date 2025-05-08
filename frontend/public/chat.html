@@ -5,12 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WASAText - Chat</title>
     <link rel="stylesheet" href="../src/assets/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <div class="chat-container">
-        <!-- conversation/chat view page -->
+    <div id="app">
+        <div class="chat-container">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="user-info">
+                    <div class="avatar-container">
+                        <div :class="['avatar', avatarColorClass]">{{ getInitial(conversation.name) }}</div>
+                    </div>
+                    <span class="chat-user-name">{{ conversation.name }}</span>
+                </div>
+                <div class="chat-actions">
+                    <img src="../src/assets/images/arrow-right.svg" alt="More options" class="header-icon">
+                </div>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div class="chat-messages">
+                <!-- Date Separator -->
+                <div v-for="(messageGroup, date) in groupedMessages" :key="date" class="message-group">
+                    <div class="date-separator">
+                        <span>{{ formatDate(date) }}</span>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div 
+                        v-for="message in messageGroup" 
+                        :key="message.id" 
+                        :class="['message-container', message.senderId === currentUserId ? 'sent' : 'received']"
+                    >
+                        <div class="message">
+                            <!-- Photo message -->
+                            <div v-if="message.isPhoto" class="message-image-container">
+                                <div class="message-image">[Photo]</div>
+                            </div>
+                            
+                            <!-- Text content -->
+                            <p class="message-text">{{ message.content }}</p>
+                            
+                            <!-- Timestamp -->
+                            <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+                            
+                            <!-- Read status (for sent messages) -->
+                            <span v-if="message.senderId === currentUserId" class="message-status">
+                                <img 
+                                    :src="message.status === 'read' ? '../src/assets/images/double-check.svg' : '../src/assets/images/single-check.svg'" 
+                                    :alt="message.status" 
+                                    class="status-icon"
+                                >
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Message Input Area -->
+            <div class="message-input-container">
+                <button class="attachment-button" aria-label="Add attachment" @click="openAttachmentMenu">
+                    <img src="../src/assets/images/plus-icon.svg" alt="Add" class="input-icon">
+                </button>
+                <input 
+                    type="text" 
+                    v-model="newMessage" 
+                    @keyup.enter="sendMessage"
+                    placeholder="Type a message..." 
+                    class="message-input" 
+                    id="messageInput" 
+                    name="messageInput"
+                >
+                <button class="send-button" aria-label="Send message" @click="sendMessage" :disabled="!newMessage.trim()">
+                    <img src="../src/assets/images/send-icon.svg" alt="Send" class="input-icon">
+                </button>
+            </div>
+        </div>
     </div>
 
-    <script src="../src/func.js"></script>
+    <script src="../src/js/chat.js" type="module"></script>
 </body>
 </html>

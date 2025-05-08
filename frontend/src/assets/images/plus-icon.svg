@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle Background -->
+  <circle cx="30" cy="30" r="28" fill="#4285f4"/>
+  
+  <!-- Plus Symbol -->
+  <line x1="18" y1="30" x2="42" y2="30" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="30" y1="18" x2="30" y2="42" stroke="white" stroke-width="4" stroke-linecap="round"/>
+</svg>

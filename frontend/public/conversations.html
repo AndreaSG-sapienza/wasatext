@@ -5,12 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WASAText - Conversations</title>
     <link rel="stylesheet" href="../src/assets/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <div class="conversations-container">
-        <!-- conversations list page -->
+    <div id="app">
+        <div class="main-container">
+            <!-- Left Panel: Conversations List -->
+            <div class="conversations-panel">
+                <!-- Profile Header -->
+                <div class="profile-header" @click="navigateToProfile">
+                    <img src="../src/assets/images/default-user.svg" alt="Profile" class="profile-image">
+                    <span class="profile-name">My Profile</span>
+                </div>
+                
+                <hr>
+                
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <img src="../src/assets/images/search-icon.svg" alt="Search" class="search-icon">
+                    <input type="text" v-model="searchQuery" name="search" placeholder="Search..." class="search-input">
+                </div>
+                
+                <!-- Conversations List -->
+                <div class="conversations-list">
+                    <!-- Conversation Items -->
+                    <div 
+                        v-for="conversation in filteredConversations" 
+                        :key="conversation.id" 
+                        class="conversation-item" 
+                        :class="{ active: selectedConversation && selectedConversation.id === conversation.id }"
+                        @click="selectConversation(conversation)"
+                    >
+                        <img :src="conversation.photo || '../src/assets/images/default-user.svg'" :alt="conversation.name" class="user-avatar">
+                        <div class="conversation-info">
+                            <div class="conversation-header">
+                                <span class="user-name">{{ conversation.name }}</span>
+                                <span class="time">{{ formatTime(conversation.lastMessage.timestamp) }}</span>
+                            </div>
+                            <p class="message-preview">{{ conversation.lastMessage.text }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Floating Action Button (FAB) for adding new conversations -->
+                <div class="fab-button" @click="openNewConversationModal">
+                    <img src="../src/assets/images/plus-icon.svg" alt="Add" class="plus-icon">
+                </div>
+            </div>
+            
+            <!-- Right Panel: Empty State or Selected Conversation -->
+            <div class="chat-panel">
+                <div v-if="!selectedConversation" class="empty-state">
+                    <p>Select a conversation to start chatting</p>
+                </div>
+                <div v-else class="chat-view">
+                    <!-- Chat header, messages, and input will be loaded here or redirected to chat.html -->
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="../src/func.js"></script>
+    <script src="../src/js/conversations.js" type="module"></script>
 </body>
 </html>

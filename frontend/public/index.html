@@ -5,22 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WASAText Login</title>
     <link rel="stylesheet" href="../src/assets/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <div class="login-container">
-        <h1>WASAText</h1>
-        <p>Enter your username to sign in or create an account</p>
-        
-        <form id="loginForm">
-            <div class="input-field">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="name" required minlength="3" maxlength="16">
-            </div>
+    <div id="app">
+        <div class="login-container">
+            <h1>Login</h1>
+            <p>Enter your username to sign in or create an account</p>
             
-            <button type="submit" class="login-button">Login</button>
-        </form>
+            <form @submit.prevent="login">
+                <div class="input-field">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" v-model="username" name="name" required minlength="3" maxlength="16">
+                </div>
+                
+                <button type="submit" class="login-button">Login</button>
+                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+            </form>
+        </div>
     </div>
 
-    <script src="../src/func.js"></script>
+    <script src="../src/js/login.js" type="module"></script>
 </body>
 </html>

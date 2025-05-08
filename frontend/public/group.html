@@ -3,14 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WASAText - Group Management</title>
+    <title>WASAText - Group Settings</title>
     <link rel="stylesheet" href="../src/assets/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <div class="group-container">
-        <!-- group management page -->
+    <div id="app">
+        <div class="settings-container group-settings">
+            <!-- Header -->
+            <div class="settings-header">
+                <button class="back-button" aria-label="Go back" @click="goBack">
+                    <img src="../src/assets/images/back.svg" alt="Back" class="back-icon">
+                </button>
+                <h1 class="settings-title">Group Settings</h1>
+            </div>
+            
+            <!-- Group Photo Section -->
+            <div class="settings-section photo-section">
+                <div class="avatar-container large">
+                    <div :class="['avatar', avatarColorClass]" aria-label="Group photo">
+                        {{ getInitial(groupName) }}
+                    </div>
+                </div>
+                <button class="photo-button" @click="changePhoto">Change Photo</button>
+            </div>
+            
+            <!-- Group Name Section -->
+            <div class="settings-section">
+                <h2 class="settings-section-title">Group Name</h2>
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        v-model="groupName" 
+                        class="settings-input" 
+                        id="groupName" 
+                        name="groupName" 
+                        aria-label="Group name input"
+                    >
+                </div>
+            </div>
+            
+            <!-- Members Section -->
+            <div class="settings-section members-section">
+                <h2 class="settings-section-title">Members ({{ members.length }})</h2>
+                
+                <!-- Member items -->
+                <div v-for="member in members" :key="member.userId" class="member-item">
+                    <div class="member-info">
+                        <div class="avatar-container">
+                            <div :class="['avatar', getAvatarColorClass(member.userName)]" aria-label="Member avatar">
+                                {{ getInitial(member.userName) }}
+                            </div>
+                        </div>
+                        <span class="member-name">{{ member.userName }}{{ member.userId === currentUserId ? ' (You)' : '' }}</span>
+                    </div>
+                    <span :class="['member-role', member.role === 'admin' ? 'admin' : '']">
+                        {{ member.role === 'admin' ? 'Admin' : 'Member' }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Leave Group Button -->
+            <div class="settings-section action-section">
+                <button class="action-button danger" @click="leaveGroup">Leave Group</button>
+            </div>
+        </div>
     </div>
 
-    <script src="../src/func.js"></script>
+    <script src="../src/js/group.js" type="module"></script>
 </body>
 </html>

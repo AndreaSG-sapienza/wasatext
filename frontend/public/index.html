@@ -10,13 +10,13 @@
 <body>
     <div id="app">
         <div class="login-container">
+            <div class="app-logo">WASAText</div>
             <h1>Login</h1>
-            <p>Enter your username to sign in or create an account</p>
+            <p>New users will be registered automatically</p>
             
             <form @submit.prevent="login">
                 <div class="input-field">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" v-model="username" name="name" required minlength="3" maxlength="16">
+                    <input type="text" id="username" v-model="username" name="name" placeholder="Username" required minlength="3" maxlength="16">
                 </div>
                 
                 <button type="submit" class="login-button">Login</button>
